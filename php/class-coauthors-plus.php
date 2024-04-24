@@ -231,8 +231,8 @@ class CoAuthors_Plus {
 		// Hooks to add additional co-authors to 'authors' column to edit page
 		add_filter( 'manage_posts_columns', array( $this, '_filter_manage_posts_columns' ) );
 		add_filter( 'manage_pages_columns', array( $this, '_filter_manage_posts_columns' ) );
-		add_action( 'manage_posts_custom_column', array( $this, '_filter_manage_posts_custom_column' ) );
-		add_action( 'manage_pages_custom_column', array( $this, '_filter_manage_posts_custom_column' ) );
+		add_action( 'manage_posts_custom_column', array( $this, '_filter_manage_posts_custom_column' ), 10, 2 );
+		add_action( 'manage_pages_custom_column', array( $this, '_filter_manage_posts_custom_column' ), 10, 2 );
 
 		// Add quick-edit co-author select field
 		add_action( 'quick_edit_custom_box', array( $this, '_action_quick_edit_custom_box' ), 10, 2 );
@@ -527,9 +527,13 @@ class CoAuthors_Plus {
 	 *
 	 * @param string $column_name
 	 */
-	public function _filter_manage_posts_custom_column( $column_name ) {
+	public function _filter_manage_posts_custom_column( $column_name, $post_id ) {
 		if ( 'coauthors' === $column_name ) {
-			global $post;
+            if ( ! $post_id ) {
+			    global $post;
+            } else {
+                $post = get_post( $post_id );
+            }
 			$authors = get_coauthors( $post->ID );
 
 			$count = 1;
@@ -827,7 +831,7 @@ class CoAuthors_Plus {
 					$current_coauthor      = $this->get_coauthor_by( 'user_nicename', wp_get_current_user()->user_nicename );
 					$current_coauthor_term = $this->get_author_term( $current_coauthor );
 
-					if ( $current_coauthor_term instanceof \WP_Term ) {
+					if ( $current_coauthor_term instanceof WP_Term ) {
 						$current_user_query  = $wpdb->term_taxonomy . '.taxonomy = \'' . $this->coauthor_taxonomy . '\' AND ' . $wpdb->term_taxonomy . '.term_id = \'' . $current_coauthor_term->term_id . '\'';
 						$this->having_terms .= ' ' . $wpdb->term_taxonomy . '.term_id = \'' . $current_coauthor_term->term_id . '\' OR ';
 
