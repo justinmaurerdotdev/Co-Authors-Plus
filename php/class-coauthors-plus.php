@@ -529,10 +529,10 @@ class CoAuthors_Plus {
 	 */
 	public function _filter_manage_posts_custom_column( $column_name, $post_id ) {
 		if ( 'coauthors' === $column_name ) {
-            if ( ! $post_id ) {
-			    global $post;
-            } else {
+            if ( $post_id ) {
                 $post = get_post( $post_id );
+            } else {
+			    global $post;
             }
 			$authors = get_coauthors( $post->ID );
 
